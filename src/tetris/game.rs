@@ -1,16 +1,7 @@
-use std::{io::{stdout, Write}, time::Duration};
+use std::{io::stdout, time::Duration};
 
 
 use rand::Rng;
-
-//use crate::{clear_screen, draw_board, draw_floor, draw_score, draw_wall};
-
-/* 
-use super::{
-    board::{board_delete_piece, board_fix_piece, board_remove_rows, board_set_piece, create_board, does_piece_fit}, draw::{self, clear_screen, draw_board, draw_floor, draw_score, draw_wall}, pieces::{get_piece_width, get_tetris_piece, get_tetris_pieces, rotate_piece}, score::score_calculator
-    
-};
-*/
 use crossterm::{
     //cursor::{Hide, MoveTo}, 
     event::{poll, read, Event::Key, KeyCode::{self, Char}}, 
@@ -19,11 +10,10 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode}
 };
 
-use super::{board::Board, draw::{self, Draw}, pieces::{get_piece_width, get_tetris_piece, get_tetris_pieces, rotate_piece}, score::score_calculator};
+use super::{board::Board, draw::Draw, pieces::{get_piece_width, get_tetris_piece, get_tetris_pieces, rotate_piece}, score::score_calculator};
 
 const REF_SPEED:i32 = 20;
-const BOARD_HEIGHT: u16 = 10;
-const BOARD_WIDTH: u16 = 10;
+
 
 pub struct Game{
    offset_w:u16,
