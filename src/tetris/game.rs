@@ -19,22 +19,26 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode}
 };
 
-use super::{board::Board, draw::{self, clear_screen, draw_board, draw_floor, draw_score, draw_wall}, pieces::{get_piece_width, get_tetris_piece, get_tetris_pieces, rotate_piece}, score::score_calculator};
+use super::{board::Board, draw::{self, Draw}, pieces::{get_piece_width, get_tetris_piece, get_tetris_pieces, rotate_piece}, score::score_calculator};
 
 const REF_SPEED:i32 = 20;
 const BOARD_HEIGHT: u16 = 10;
 const BOARD_WIDTH: u16 = 10;
 
 pub struct Game{
+   offset_w:u16,
+   offset_h:u16,
    width:u16,
    height:u16,
 }
 
 impl Game{
-    pub fn new() -> Game {
+    pub fn new(offset_w:u16, offset_h: u16, w:u16,h:u16) -> Game {
         Game{
-            width: BOARD_WIDTH,
-            height: BOARD_HEIGHT,
+            offset_w: offset_w,
+            offset_h: offset_h,
+            width: w,
+            height: h,
         }
     }
     pub fn run(&self){
@@ -47,19 +51,26 @@ impl Game{
         //let mut fix_piece=false;
         enable_raw_mode().unwrap();
 
-        let mut stdout = stdout();
+        let stdout = stdout();
         
+        let mut the_draw = Draw::new(
+            self.offset_w,
+            self.offset_h,
+            self.width,
+            self.height,
+            stdout);
+
         let pieces = get_tetris_pieces();
-        let mut the_board = Board::new(10,10);
+        let mut the_board = Board::new(self.width,self.height);
 
         // Limpia la pantalla
-        draw::clear_screen(&mut stdout);
+        the_draw.clear_screen();
         
         let random_number = rand::thread_rng().gen_range(1..=pieces.len());
         let mut piece = get_tetris_piece(random_number - 1);
         if the_board.does_piece_fit(actual_x, actual_y, &piece){
             the_board.board_set_piece(actual_x, actual_y, &piece);
-            draw_board(&mut stdout, &the_board.board);
+            the_draw.draw_board(&the_board.board);
         }
 
         loop {
@@ -79,7 +90,7 @@ impl Game{
                             
                         },
                         KeyCode::Right => {
-                            if actual_x + get_piece_width(&piece) as u16 == 10{
+                            if actual_x + get_piece_width(&piece) as u16 == self.width{
                                 continue;
                             }
 
@@ -108,7 +119,7 @@ impl Game{
                         },
                         _ => {}
                     }
-                    draw_board(&mut stdout, &the_board.board);
+                    the_draw.draw_board(&the_board.board);
                 },
                 Err(err) => {
                     eprintln!("Error: {:?}", err);
@@ -138,17 +149,17 @@ impl Game{
                             let random_number = rand::thread_rng().gen_range(1..=pieces.len());
                             piece = get_tetris_piece(random_number - 1);
                         }   
-                    draw_board(&mut stdout, &the_board.board);
+                    the_draw.draw_board(&the_board.board);
                 }
                 
             }
         
-            draw_floor(&mut stdout);
-            draw_wall(&mut stdout);
-            draw_score(&mut stdout, score);
+            the_draw.draw_floor();
+            the_draw.draw_wall();
+            the_draw.draw_score(score);
         } 
-        clear_screen(&mut stdout);
-        stdout.flush().unwrap();
+        the_draw.clear_screen();
+        the_draw.flush();
         disable_raw_mode().unwrap();
     }
 }
