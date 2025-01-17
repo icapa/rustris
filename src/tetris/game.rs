@@ -72,7 +72,14 @@ impl Game{
                             break;
                         },                   
                         Char('r') => {
+                            
+                            let aux_piece = rotate_piece(&piece);
                             the_board.board_delete_piece(actual_x,actual_y,&piece);
+                            if the_board.does_piece_fit(actual_x, actual_y, &aux_piece)==false{
+                                continue;
+                            }
+
+                            
                             piece = rotate_piece(&piece);
                             if the_board.does_piece_fit(actual_x, actual_y, &piece){
                                 the_board.board_set_piece(actual_x, actual_y, &piece);

@@ -106,7 +106,7 @@ pub fn debug_draw_board(board: &Vec<Vec<char>>, aux_text: &str) {
 mod tests {
     use std::vec;
 
-    use crate::tetris::pieces;
+    use crate::tetris::{board, pieces::{self, rotate_piece}};
 
     use super::*;
     
@@ -155,9 +155,9 @@ mod tests {
         let mut the_board = Board::new(10, 10);        let all_pieces = pieces::get_tetris_pieces();
         let piece = &all_pieces[0];
         assert!(&the_board.does_piece_fit(0, 0, &piece));
-        &the_board.board_set_piece(0, 0, &piece);
+        the_board.board_set_piece(0, 0, &piece);
         debug_draw_board(&the_board.board,"Hola");
-        &the_board.board_delete_piece(0, 0, &piece);
+        the_board.board_delete_piece(0, 0, &piece);
         assert!(the_board.does_piece_fit(1, 0, &piece));
         the_board.board_set_piece(1, 0, &piece);
         debug_draw_board(&the_board.board,"Hola");
@@ -177,13 +177,14 @@ mod tests {
 
         debug_draw_board(&the_board.board, "INI");
         assert_eq!(the_board.board_rows_completed(), vec![8 as u16,9 as u16]);
-        &the_board.board_remove_rows();
+        the_board.board_remove_rows();
         debug_draw_board(&the_board.board,"ROW");
 
     }   
     #[test]
     fn test_complete_movement(){
-        let mut the_board = Board::new(10, 10);        let all_pieces = pieces::get_tetris_pieces();
+        let mut the_board = Board::new(10, 10);        
+        let all_pieces = pieces::get_tetris_pieces();
         let piece = &all_pieces[2];
         let actual_x:u16=0;
         let mut actual_y:u16=0;
@@ -222,6 +223,41 @@ mod tests {
             the_board.board_set_piece(actual_x, actual_y, piece);
         }
         debug_draw_board(&the_board.board,actual_y.to_string().as_str());
+
+    }
+    #[test]
+    fn test_board_rotate_border_piece(){
+        let mut the_board = Board::new(10, 10);        
+        let all_pieces = pieces::get_tetris_pieces();
+        let piece = &all_pieces[2];
+        let actual_x:u16=7;
+        let actual_y:u16=4;
+        the_board.board_set_piece(actual_x,actual_y, &piece);
+        debug_draw_board(&the_board.board,actual_y.to_string().as_str()); 
+        
+        let new_piece = rotate_piece(&piece);
+
+        the_board.board_delete_piece(actual_x, actual_y, &piece);
+        assert_eq!(true,the_board.does_piece_fit(actual_x, actual_y, &new_piece));
+        the_board.board_set_piece(actual_x, actual_y, &new_piece);  
+        debug_draw_board(&the_board.board,actual_y.to_string().as_str()); 
+        
+        let new_piece2 = rotate_piece(&new_piece);
+        the_board.board_delete_piece(actual_x, actual_y, &new_piece);
+        assert_eq!(true,the_board.does_piece_fit(actual_x, actual_y, &new_piece2));
+
+        the_board.board_set_piece(actual_x, actual_y, &new_piece2);  
+        debug_draw_board(&the_board.board,actual_y.to_string().as_str()); 
+
+        let new_piece3 = rotate_piece(&new_piece2);
+        the_board.board_delete_piece(actual_x, actual_y, &new_piece2);
+        assert_eq!(true,the_board.does_piece_fit(actual_x, actual_y, &new_piece3));
+
+        the_board.board_set_piece(actual_x, actual_y, &new_piece3);  
+        debug_draw_board(&the_board.board,actual_y.to_string().as_str()); 
+
+
+
 
     }
 }
